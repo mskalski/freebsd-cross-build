@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM freebsd-cross-devenv:latest
 LABEL maintainer="mskalski13@gmail.com"
 
 ARG PREFIX=/freebsd
@@ -9,9 +9,7 @@ ADD fix-links ${PREFIX}/fix-links
 
 # The header correction etc is because the soft-links are broken in the iso
 #https://lists.freebsd.org/pipermail/freebsd-current/2011-August/026487.html
-RUN apt-get -y update && \
-    apt-get -y install build-essential m4 bison flex git vim file libtool automake autoconf autogen pkg-config mc bmake && \
-    mkdir -p /src && \
+RUN mkdir -p /src && \
     mkdir -p ${PREFIX}/${TARGET} && \
     mv ${PREFIX}/usr/include ${PREFIX}/${TARGET} && \
     mv ${PREFIX}/usr/lib ${PREFIX}/${TARGET} && \

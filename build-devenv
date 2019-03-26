@@ -1,4 +1,4 @@
 #!/bin/sh
 
-docker build -f Dockerfile.devenv -t cross-freebsd-devenv .
+docker build -f Dockerfile.devenv -t freebsd-cross-devenv .
 
