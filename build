@@ -22,9 +22,13 @@ rm -rf freebsd
 mkdir -p freebsd
 (cd freebsd &&
  7z x ../6.3-RELEASE-powerpc-disc1.iso 6.3-RELEASE/base/base.?? &&
- cat 6.3-RELEASE/base/base.?? | tar xzf - ./usr/include ./usr/lib ./lib
+ cat 6.3-RELEASE/base/base.?? | tar xzf - ./usr/include ./usr/lib ./lib ./usr/share/mk &&
+ rm -fr 6.3-RELEASE
  ) || return 1
 
-docker build -t freebsd6-powerpc-cross-build .
-exit 0
+docker build -t 'freebsd-powerpc-cross-build:6.3' .
+ret=$?
+rm -fr freebsd/
+
+exit $ret
 
