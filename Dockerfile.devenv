@@ -1,0 +1,10 @@
+FROM ubuntu:16.04
+LABEL maintainer="mskalski13@gmail.com"
+
+RUN apt-get -y update && \
+    apt-get -y install build-essential m4 bison flex git vim file \
+               libtool automake autoconf autogen pkg-config mc bmake \
+               libgmp-dev libmpc-dev libmpfr-dev git && \
+    apt-get clean
+    
+
