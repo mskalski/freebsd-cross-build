@@ -1,0 +1,34 @@
+#!/bin/sh
+
+#echo "MKTEMP: $0 $*" 1>&2
+
+args=''
+
+TEMPLATES=''
+
+while :; do
+
+  case "$1" in
+    -t|--template) 
+      # FreeBSD version it needs argument and $2 is prefix
+      # Linux version it's a flag for use single name component
+      args="$args $1";
+      TEMPLATES="$2.XXXXXXXX"
+      shift
+      shift
+      ;; 
+    -*)
+      args="$args $1"
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+
+done
+
+
+#echo "MKTEMP: /bin/mktemp $args $TEMPLATES $*" 1>&2
+exec /bin/mktemp $args $TEMPLATES "$@"
+

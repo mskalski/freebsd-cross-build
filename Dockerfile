@@ -2,7 +2,8 @@ FROM freebsd-cross-devenv:latest
 LABEL maintainer="mskalski13@gmail.com"
 
 ARG PREFIX=/freebsd
-ARG TARGET=powerpc-pc-freebsd6
+ARG TARGET_ARCH=powerpc
+ARG TARGET=${TARGET_ARCH}-pc-freebsd6
 
 ADD freebsd ${PREFIX}
 ADD fix-links ${PREFIX}/fix-links
@@ -19,9 +20,6 @@ RUN mkdir -p /src && \
 
 ADD binutils-2.25.1.tar.gz /src/
 ADD gcc-4.8.5.tar.bz2 /src/
-ADD gmp-6.0.0a.tar.xz /src/
-ADD mpc-1.0.3.tar.gz /src/
-ADD mpfr-3.1.3.tar.xz /src/
 
 RUN \
     export PATH="${PREFIX}/bin:${PATH}" && \
@@ -32,43 +30,36 @@ RUN \
     make -j4 && \
     make install && \
     \
-    cd /src/gmp-6.0.0 && \
-    ./configure --prefix=${PREFIX} --enable-shared --enable-static \
-      --enable-fft --enable-cxx && \
-    make -j4 && \
-    make install && \
-    cd /src/mpfr-3.1.3 && \
-    ./configure --prefix=${PREFIX} --with-gnu-ld  --enable-static \
-      --enable-shared --with-gmp=${PREFIX} && \
-    make -j4 && \
-    make install && \
-    cd /src/mpc-1.0.3/ && \
-    ./configure --prefix=${PREFIX} --with-gnu-ld \
-      --enable-static --enable-shared --with-gmp=${PREFIX} \
-      --with-mpfr=${PREFIX} &&\
-    make -j4 && \
-    make install && \
-    \
     mkdir -p /src/gcc-4.8.5/build && \
     cd /src/gcc-4.8.5/build && \
     ../configure --without-headers --with-gnu-as --with-gnu-ld --disable-nls \
         --enable-languages=c,c++ --enable-libssp --enable-ld \
         --disable-libitm --disable-libquadmath --disable-libgomp \
-        --target=${TARGET} \
-        --prefix=${PREFIX} --with-gmp=${PREFIX} \
-        --with-mpc=${PREFIX} --with-mpfr=${PREFIX} && \
+        --target=${TARGET} --prefix=${PREFIX} && \
     LD_LIBRARY_PATH=${PREFIX}/lib make -j10  && \
     make install && \
     cd / && \
     rm -rf /src
 
-env LD_LIBRARY_PATH ${PREFIX}/lib
-env PATH ${PREFIX}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-env CC ${TARGET}-gcc
-env CPP ${TARGET}-cpp
-env AS ${TARGET}-as
-env LD ${TARGET}-ld
-env AR ${TARGET}-ar
-env RANLIB ${TARGET}-ranlib
-env HOST ${TARGET}
-env MAKESYSPATH ${PREFIX}/${TARGET}/share/mk
+ADD compat ${PREFIX}/bin
+  
+ENV LD_LIBRARY_PATH ${PREFIX}/lib
+ENV PATH ${PREFIX}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV CC ${TARGET}-gcc
+ENV CXX ${TARGET}-g++
+ENV CPP ${TARGET}-cpp
+ENV AS ${TARGET}-as
+ENV LD ${TARGET}-ld
+ENV AR ${TARGET}-ar
+ENV NM ${TARGET}-nm
+ENV OBJCOPY ${TARGET}-objcopy
+ENV OBJDUMP ${TARGET}-objdump
+ENV RANLIB ${TARGET}-ranlib
+ENV READELF ${TARGET}-readelf
+ENV STRIP ${TARGET}-strip
+
+ENV HOST ${TARGET}
+ENV MAKESYSPATH ${PREFIX}/${TARGET}/share/mk
+ENV TARGET_ARCH ${TARGET_ARCH}
+ENV TARGET_MACHINE ${TARGET_ARCH}
+ENV TARGET_OS FreeBSD

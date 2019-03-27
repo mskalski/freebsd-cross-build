@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# Remove all unrecognized by linux version of tsort options
+
+#echo "LORDER: $0 $*" 1>&2
+
+args=''
+quiet=0
+
+while :; do
+
+  case "$1" in
+    -l|-d) # ignore parameters
+      shift
+      ;; 
+    -q)
+      quiet=1
+      shift
+      ;;
+    -*)
+      args="$args $1"
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+
+done
+
+if [ $quiet -ne 0 ] ;then
+  exec /usr/bin/tsort $args "$@" 2>/dev/null
+else
+  exec /usr/bin/tsort $args "$@"
+fi
+
+

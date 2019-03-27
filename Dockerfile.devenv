@@ -6,5 +6,7 @@ RUN apt-get -y update && \
                libtool automake autoconf autogen pkg-config mc bmake \
                libgmp-dev libmpc-dev libmpfr-dev git && \
     apt-get clean
-    
 
+ADD tools    /usr/local/bin/
+ADD scripts  /root/
+ADD scripts  /etc/skel/
