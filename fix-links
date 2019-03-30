@@ -41,6 +41,11 @@ for l in $links; do
   esac
 done
 
+ldscripts=`fgrep -rIl 'GROUP ('  "$prefix" 2> /dev/null | grep '\.so$'`
+for s in $ldscripts; do
+  sed -i '/GROUP (/s:\([ ]*\)\(/usr\)*/lib/:\1:g' "$s"
+done
+
 
 ln -sf $prefix/lib/gcc/$triplet/4.8.5/libgcc.a   $DESTDIR$prefix/$triplet/lib/libgcc.a
 ln -sf $prefix/lib/gcc/$triplet/4.8.5/libgcc_p.a $DESTDIR$prefix/$triplet/lib/libgcc_p.a

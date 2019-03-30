@@ -1,9 +1,9 @@
-FROM freebsd-cross-devenv:latest
+FROM freebsd-cross-devenv:latest as freebsd_cross_builder
 LABEL maintainer="mskalski13@gmail.com"
 
 ARG PREFIX=/freebsd
-ARG TARGET_ARCH=powerpc
-ARG TARGET=${TARGET_ARCH}-pc-freebsd6
+ARG TARGET_ARCH=aarch64
+ARG TARGET=${TARGET_ARCH}-pc-freebsd12
 
 ADD freebsd ${PREFIX}
 ADD fix-links ${PREFIX}/fix-links
@@ -16,30 +16,45 @@ RUN mkdir -p /src && \
     mv ${PREFIX}/usr/lib ${PREFIX}/${TARGET} && \
     mv ${PREFIX}/usr/share ${PREFIX}/${TARGET} && \
     mv ${PREFIX}/lib/* ${PREFIX}/${TARGET}/lib && \
+    rm -fr ${PREFIX}/usr ${PREFIX}/lib && \
     ${PREFIX}/fix-links ${PREFIX} "${TARGET}"
 
-ADD binutils-2.25.1.tar.gz /src/
-ADD gcc-4.8.5.tar.bz2 /src/
+ADD binutils-2.32.tar.gz /src/
 
 RUN \
     export PATH="${PREFIX}/bin:${PATH}" && \
-    cd /src/binutils-2.25.1 && \
+    cd /src/binutils-2.32 && \
     ./configure --enable-libssp --enable-ld --prefix=${PREFIX} \
-                --host=x86_64-linux-gnu --target=${TARGET} \
+                --target=${TARGET} \
                 --with-sysroot --disable-nls --disable-werror && \
     make -j4 && \
-    make install && \
-    \
-    mkdir -p /src/gcc-4.8.5/build && \
-    cd /src/gcc-4.8.5/build && \
+    make install
+
+ADD gcc-7.4.0.tar.xz /src/
+    
+RUN \
+    mkdir -p /src/gcc-7.4.0/build && \
+    cd /src/gcc-7.4.0/build && \
     ../configure --without-headers --with-gnu-as --with-gnu-ld --disable-nls \
         --enable-languages=c,c++ --enable-libssp --enable-ld \
         --disable-libitm --disable-libquadmath --disable-libgomp \
-        --target=${TARGET} --prefix=${PREFIX} && \
+        --enable-threads=posix --disable-nls \
+        --target=${TARGET} --prefix=${PREFIX} --libexecdir=${PREFIX}/lib && \
     LD_LIBRARY_PATH=${PREFIX}/lib make -j10  && \
-    make install && \
-    cd / && \
-    rm -rf /src
+    make install
+    
+    
+RUN \
+    find ${PREFIX} -type f -executable -a '!' -type l | xargs file | grep 'ELF.*executable' | sed 's/:.*$//' | xargs strip || true
+
+FROM freebsd-cross-devenv:latest
+LABEL maintainer="mskalski13@gmail.com"
+
+ARG PREFIX=/freebsd
+ARG TARGET_ARCH=aarch64
+ARG TARGET=${TARGET_ARCH}-pc-freebsd12
+
+COPY --from=freebsd_cross_builder $PREFIX $PREFIX
 
 ADD compat ${PREFIX}/bin
   
