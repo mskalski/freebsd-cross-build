@@ -1,5 +1,43 @@
 #!/bin/sh
 
+default_tag='freebsd-aarch64-cross-build:12.0'
+
+usage()
+{
+  echo "$0 [-t tag [-t tag...] [docker build options]"
+  echo ""
+  echo "Docker args:"
+  echo "   TARGET_ARCH: target architecture (aarch64)"
+  echo "   TARGET:      target triplet (aarch64-pc-freebsd12)"
+  echo "   PREFIX:      install prefix (/freebsd)"
+  echo "   default tag: $default_tag"
+}
+
+tags=''
+
+while :; do
+
+  case "$1" in
+    -t|--tag)
+      [ "X$2" = "X" ] && { echo "option $1 requires argument" 1>&2; exit 1; }
+      tags="$tags $2"
+      shift
+      shift
+      ;;
+
+    --help)
+      usage
+      exit 0
+      ;;
+      
+    *)
+      break
+      ;;
+    
+  esac
+done
+
+
 x() {
     n=$(basename "$1")
     [ -f "$n" ] && echo "$n already fetched" || wget -O "$n" "$1"
@@ -7,23 +45,26 @@ x() {
 
 x http://ftp.gnu.org/gnu/binutils/binutils-2.32.tar.gz
 x http://ftp.gnu.org/gnu/gcc/gcc-7.4.0/gcc-7.4.0.tar.xz
+x http://ftp.gnu.org/gnu/gdb/gdb-8.2.tar.gz
 x http://download.freebsd.org/ftp/releases/arm64/12.0-RELEASE/base.txz
 #x http://download.freebsd.org/ftp/releases/arm64/12.0-RELEASE/src.txz
 
-S=`sha1sum base.txz | awk '{print $1}'`
-if [ "$S" != "007130d6e805c2bf2888485eb0c3c3b34e0137ec" ]
-then
-    >&2 echo "Error: sha1sum of base.txz does not match"
-    exit 1
-fi
+
 
 rm -rf freebsd
 mkdir -p freebsd
 (cd freebsd &&
  tar xJf ../base.txz ./usr/include ./usr/lib ./lib ./usr/share/mk
- ) || return 1
+) || return 1
 
-docker build -t 'freebsd-aarch64-cross-build:12.0' "$@" .
+if [ "X$tags" = "X" ]; then
+  tag_opts="-t $default_tag"
+else
+  tag_opts=`for tag in $tags; do echo "-t $tag"; done`
+fi
+  
+
+docker build $tag_opts "$@" .
 ret=$?
 rm -fr freebsd/
 

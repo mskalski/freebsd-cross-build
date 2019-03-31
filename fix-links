@@ -47,6 +47,6 @@ for s in $ldscripts; do
 done
 
 
-ln -sf $prefix/lib/gcc/$triplet/4.8.5/libgcc.a   $DESTDIR$prefix/$triplet/lib/libgcc.a
-ln -sf $prefix/lib/gcc/$triplet/4.8.5/libgcc_p.a $DESTDIR$prefix/$triplet/lib/libgcc_p.a
+#ln -sf $prefix/lib/gcc/$triplet/4.8.5/libgcc.a   $DESTDIR$prefix/$triplet/lib/libgcc.a
+#ln -sf $prefix/lib/gcc/$triplet/4.8.5/libgcc_p.a $DESTDIR$prefix/$triplet/lib/libgcc_p.a
 
