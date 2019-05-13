@@ -41,6 +41,14 @@ RUN \
     cd / && \
     rm -rf /src
 
+# Add required BSD users and groups
+RUN groupadd --non-unique --force --gid 0 wheel    && \
+    for group in staff operator guest man news mail games; do \
+      groupadd --force --system $group; \
+    done && \
+    useradd --non-unique --uid 0 --gid 0 --no-create-home -c 'Bourne-again Superuser' -d /root -s /bin/bash toor && \
+    grep -q '^kmem' /etc/passwd || useradd --gid kmem --no-create-home -c 'KMem Sandbox' -d / -s /usr/sbin/nologin kmem 
+    
 ADD compat ${PREFIX}/bin
   
 ENV LD_LIBRARY_PATH ${PREFIX}/lib
