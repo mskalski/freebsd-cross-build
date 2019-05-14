@@ -6,7 +6,9 @@ RUN apt-get -y update && \
                libtool automake autoconf autogen pkg-config mc bmake \
                git texinfo \
                libgmp-dev libmpc-dev libmpfr-dev libbabeltrace-dev && \
-    apt-get clean
+    apt-get -y install freebsd-buildutils freebsd-glue freebsd-manpages freebsd-mk \
+               libfreebsd-glue-0 libutil-freebsd-dev libelf-freebsd-dev libdwarf-freebsd-dev && \
+    apt-get -y clean
 
 ADD tools    /usr/local/bin/
 ADD scripts  /root/
