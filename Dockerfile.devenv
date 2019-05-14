@@ -1,10 +1,11 @@
-FROM ubuntu:16.04
+FROM ubuntu:16.04 AS freebsd-cross-devenv
 LABEL maintainer="mskalski13@gmail.com"
 
 RUN apt-get -y update && \
     apt-get -y install build-essential m4 bison flex git vim file \
                libtool automake autoconf autogen pkg-config mc bmake \
-               libgmp-dev libmpc-dev libmpfr-dev git && \
+               git texinfo \
+               libgmp-dev libmpc-dev libmpfr-dev libbabeltrace-dev && \
     apt-get -y install freebsd-buildutils freebsd-glue freebsd-manpages freebsd-mk \
                libfreebsd-glue-0 libutil-freebsd-dev libelf-freebsd-dev libdwarf-freebsd-dev && \
     apt-get -y clean
