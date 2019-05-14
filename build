@@ -1,32 +1,43 @@
 #!/bin/sh
 
+# ver 6.3
+freebsd_iso=ftp://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/i386/ISO-IMAGES/6.3/6.3-RELEASE-i386-disc1.iso
+freebsd_iso_md5=cdb0dfa4b2db3e4c9cc19138f4fb2ada
+# ver 6.4
+#freebsd_iso=ftp://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/i386/ISO-IMAGES/6.4/6.4-RELEASE-i386-disc1.iso
+#freebsd_iso_md5=3bf0054bf0d650c1c7289e3076f2a24f
+
 x() {
     n=$(basename "$1")
     [ -f "$n" ] && echo "$n already fetched" || wget "$1"
 }
 x http://ftp.gnu.org/gnu/binutils/binutils-2.25.1.tar.gz
 x http://ftp.gnu.org/gnu/gmp/gmp-6.0.0a.tar.xz
-x ftp://ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/powerpc/ISO-IMAGES/6.3/6.3-RELEASE-powerpc-disc1.iso
+x $freebsd_iso
 x http://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.xz
 x http://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz
 x http://ftp.gnu.org/gnu/gcc/gcc-4.8.5/gcc-4.8.5.tar.bz2
 
-S=`sha1sum 6.3-RELEASE-powerpc-disc1.iso | awk '{print $1}'`
-if [ "$S" != "5bb7a80f8aa2568a57826aa6bd35d2e171566fec" ]
+freebsd_iso_file=`basename "$freebsd_iso"`
+freebsd_ver=`echo "$freebsd_iso_file" | sed 's/-.*$//'`
+
+S=`md5sum "$freebsd_iso_file" | awk '{print $1}'`
+if [ "$S" != "$freebsd_iso_md5" ]
 then
-    >&2 echo "Error: sha1sum does not match"
+    >&2 echo "Error: md5sum does not match"
     exit 1
 fi
 
 rm -rf freebsd
 mkdir -p freebsd
 (cd freebsd &&
- 7z x ../6.3-RELEASE-powerpc-disc1.iso 6.3-RELEASE/base/base.?? &&
- cat 6.3-RELEASE/base/base.?? | tar xzf - ./usr/include ./usr/lib ./lib ./usr/share/mk &&
- rm -fr 6.3-RELEASE
+ dir=$freebsd_ver-RELEASE
+ 7z x "../$freebsd_iso_file" $dir/base/base.?? &&
+ cat $dir/base/base.?? | tar xzf - ./usr/include ./usr/lib ./lib ./usr/share/mk &&
+ rm -fr "$dir"
  ) || return 1
 
-docker build -t 'freebsd-powerpc-cross-build:6.3' .
+docker build -t 'freebsd-i386-cross-build:6.3' .
 ret=$?
 rm -fr freebsd/
 

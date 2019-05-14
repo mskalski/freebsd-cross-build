@@ -2,7 +2,7 @@ FROM freebsd-cross-devenv:latest
 LABEL maintainer="mskalski13@gmail.com"
 
 ARG PREFIX=/freebsd
-ARG TARGET_ARCH=powerpc
+ARG TARGET_ARCH=i386
 ARG TARGET=${TARGET_ARCH}-pc-freebsd6
 
 ADD freebsd ${PREFIX}
